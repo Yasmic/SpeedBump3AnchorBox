@@ -256,16 +256,23 @@ def _main_(args):
     ###############################
     callbacks = create_callbacks(config['train']['saved_weights_name'], config['train']['tensorboard_dir'], infer_model)
 
-    train_model.fit_generator(
+    history = train_model.fit_generator(
         generator        = train_generator, 
         steps_per_epoch  = len(train_generator) * config['train']['train_times'], 
         epochs           = config['train']['nb_epochs'] + config['train']['warmup_epochs'], 
         verbose          = 2 if config['train']['debug'] else 1,
+        validation_data =  valid_generator,
+        validation_steps =  len(valid_generator) * config['train']['train_times'],  #np.floor(valid_generator / batch_size)
         callbacks        = callbacks, 
         workers          = 4,
         max_queue_size   = 8
     )
 
+    impot matplotlib.pyplot as plt
+    plt.plot(history.history["loss"],label='loss')
+    plt.plot(history.history["val_loss"],label='val_loss')
+    plt.legend()
+    plt.show()
     # make a GPU version of infer_model for evaluation
     if multi_gpu > 1:
         infer_model = load_model(config['train']['saved_weights_name'])
