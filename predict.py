@@ -116,22 +116,24 @@ def _main_(args):
         for image_path in image_paths:
             image = cv2.imread(image_path)
             print(image_path)
-            tree = ET.parse(xml_path)
-            root = tree.getroot()
+
 
             # predict the bounding boxes
             boxes = get_yolo_boxes(infer_model, [image], net_h, net_w, config['model']['anchors'], obj_thresh, nms_thresh)[0]
 
             # draw bounding boxes on the image using labels
             draw_boxes(image, boxes, config['model']['labels'], obj_thresh) 
-            for object in root.findall('object'):
-                for bndbox in object.findall('bndbox'):
-            
-                    xmin = bndbox.find('xmin').text
-                    ymin = bndbox.find('ymin').text
-                    xmax = bndbox.find('xmax').text
-                    ymax = bndbox.find('ymax').text
-                    cv2.rectangle(image,(int(xmin),int(ymin)),(int(xmax),int(ymax)),(0,255,0),5)
+            if(xml_path != None):
+                tree = ET.parse(xml_path)
+                root = tree.getroot()            
+                for object in root.findall('object'):
+                    for bndbox in object.findall('bndbox'):
+                
+                        xmin = bndbox.find('xmin').text
+                        ymin = bndbox.find('ymin').text
+                        xmax = bndbox.find('xmax').text
+                        ymax = bndbox.find('ymax').text
+                        cv2.rectangle(image,(int(xmin),int(ymin)),(int(xmax),int(ymax)),(0,255,0),5)
      
             # write the image with bounding boxes to file
             cv2.imwrite(output_path + image_path.split('/')[-1], np.uint8(image))         
@@ -139,7 +141,7 @@ def _main_(args):
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Predict with a trained yolo model')
     argparser.add_argument('-c', '--conf', help='path to configuration file')
-    argparser.add_argument('-x', '--xml_path', help='path to xml')
+    argparser.add_argument('-x', '--xml_path',default=None, help='path to xml')
     
     argparser.add_argument('-i', '--input', help='path to an image, a directory of images, a video, or webcam')    
     argparser.add_argument('-o', '--output', default='output/', help='path to output directory')   
