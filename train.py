@@ -268,7 +268,7 @@ def _main_(args):
         max_queue_size   = 8
     )
 
-    impot matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     plt.plot(history.history["loss"],label='loss')
     plt.plot(history.history["val_loss"],label='val_loss')
     plt.legend()
